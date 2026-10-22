@@ -37,6 +37,8 @@ def license_(email, client=None):
     if client:
         body["client"] = client
     d = call("/api/license", body)
+    if not d.get("ok") and d.get("plan") == "b2b" and not client:
+        sys.exit("NEED_CLIENT: agency license, run install again with --client \"Client name\"")
     if not d.get("ok"):
         sys.exit("LICENSE_FAIL: " + d.get("erro", "no active subscription"))
     return d
@@ -84,8 +86,6 @@ def cmd_install(a):
     if a.client and a.dir == "fabrica":
         a.dir = "fabrica-" + slug(a.client)  # uma pasta por cliente
     d = license_(a.email, a.client)
-    if d.get("plan") == "b2b" and not a.client:
-        sys.exit("NEED_CLIENT: agency license, run install again with --client \"Client name\"")
     files = unpack(download(d["download"]), a.dir)
     info = {"email": a.email.strip().lower(), "version": d.get("version")}
     if a.client:
