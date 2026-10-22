@@ -1,0 +1,14 @@
+{
+  "name": "fabrica",
+  "owner": { "name": "Fábrica", "url": "https://fabrica-site-71s.pages.dev/en/" },
+  "description": "Fábrica: your company as a pixel-art factory. Claude installs it, pulls your funnel numbers and keeps it updated.",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "fabrica",
+      "source": "./plugin",
+      "description": "Installs and updates Fábrica (needs an active subscription), builds the config from a short interview and fills the numbers from your connected tools.",
+      "category": "productivity"
+    }
+  ]
+}

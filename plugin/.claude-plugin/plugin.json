@@ -1,0 +1,7 @@
+{
+  "name": "fabrica",
+  "version": "1.0.0",
+  "description": "Fábrica installer: license check, download, setup interview, numbers from your tools, updates.",
+  "author": { "name": "Fábrica", "url": "https://fabrica-site-71s.pages.dev/en/" },
+  "homepage": "https://fabrica-site-71s.pages.dev/en/"
+}
