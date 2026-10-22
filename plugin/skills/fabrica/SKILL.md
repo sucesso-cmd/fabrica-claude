@@ -1,6 +1,6 @@
 ---
 name: fabrica
-description: Install, configure, refresh the numbers of, or update Fábrica, the pixel-art factory that shows a company's funnel, bottleneck, delivery and team actions. Use when the user runs /fabrica, asks to install or set up Fábrica, to update its numbers, or to update the app.
+description: Install (for one company or, on the agency plan, per client), configure, refresh the numbers of, or update Fábrica, the pixel-art factory that shows a company's funnel, bottleneck, delivery and team actions. Use when the user runs /fabrica, asks to install or set up Fábrica, to update its numbers, or to update the app.
 ---
 
 # Fábrica
@@ -13,7 +13,20 @@ The helper script `fabrica.py` lives in this skill's base directory. Run it with
 
 1. Ask for the email used to subscribe. Run `fabrica.py install --email EMAIL --dir fabrica` in the user's current folder (ask first if they want another folder).
 2. If it prints `LICENSE_FAIL`, tell the user plainly that no active Fábrica subscription was found for that email and give them https://fabrica-site-71s.pages.dev/en/#preco. Stop there.
-3. On success, go to step 2. Never edit `index.html`.
+3. If it prints `NEED_CLIENT`, the email has the agency plan: ask which client this factory is for and use the client install below.
+4. On success, go to step 2. Never edit `index.html`.
+
+### Agency plan: one factory per client
+
+`/fabrica client "Client name"` (or the user says they are an agency installing for a client):
+
+1. Ask for the agency email (once; reuse it for later clients in the same session) and the client name if missing.
+2. Run `fabrica.py install --email EMAIL --client "Client name"`. It creates `fabrica-<client>/` in the current folder and sets `chave` in the config so several factories can live on one domain.
+3. The output shows `clients_used` of `clients_limit`. Tell the user in one line (e.g. "3 of 10 client slots used"). Reinstalling or updating the same client does not use a slot.
+4. If it prints `LICENSE_FAIL` with "limit reached", list the clients already installed (they are in the message) and tell the user to reply to their receipt to add slots. Stop.
+5. Then do steps 2 to 4 for that client: the interview is about the client's funnel and team, and the numbers come from the client's tools or sheet. Owners can mix both teams (e.g. "Agency", "Front desk"). When publishing, suggest one link per client (e.g. `client.youragency.com`).
+
+For later runs on a client, work inside that client's folder (`--dir fabrica-<client>`).
 
 ## 2. Short interview → fabrica.config.js
 
@@ -46,7 +59,7 @@ Then run `fabrica.py check --dir fabrica`; if `faltando` lists stage ids, fix th
 ## 5. Later runs
 
 - `/fabrica numbers`: recount with the same mapping (it is the same tools and the same definitions; save the mapping in `fabrica/.fabrica-mapa.json` the first time so later runs reuse it) and run `fabrica.py numbers`.
-- `/fabrica update`: run `fabrica.py update --dir fabrica`. It keeps their config, numbers and actions. If it prints `LICENSE_FAIL`, the subscription is no longer active: tell them, the current version keeps working but will not update.
+- `/fabrica update`: run `fabrica.py update --dir fabrica` (agencies: once per `fabrica-<client>` folder). It keeps their config, numbers and actions. If it prints `LICENSE_FAIL`, the subscription is no longer active: tell them, the current version keeps working but will not update.
 - Suggest a weekly refresh. If the user wants it automatic, offer a scheduled task that runs `/fabrica numbers` every Monday.
 
 ## Rules

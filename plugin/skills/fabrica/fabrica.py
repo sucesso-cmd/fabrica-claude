@@ -3,6 +3,7 @@
 
   python3 fabrica.py license --email you@co.com
   python3 fabrica.py install --email you@co.com [--dir fabrica]
+  python3 fabrica.py install --email you@agency.com --client "Sunny Dental"   # plano agências: pasta fabrica-sunny-dental
   python3 fabrica.py update  [--dir fabrica]
   python3 fabrica.py numbers --file numeros.json [--dir fabrica]   # grava dados.json e liga a fonte json
   python3 fabrica.py check   [--dir fabrica]                       # confere config e dados
@@ -27,8 +28,15 @@ def call(path, body=None):
             return {"ok": False, "erro": f"HTTP {e.code}"}
 
 
-def license_(email):
-    d = call("/api/license", {"email": email.strip().lower()})
+def slug(t):
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-")[:60]
+
+
+def license_(email, client=None):
+    body = {"email": email.strip().lower()}
+    if client:
+        body["client"] = client
+    d = call("/api/license", body)
     if not d.get("ok"):
         sys.exit("LICENSE_FAIL: " + d.get("erro", "no active subscription"))
     return d
@@ -60,25 +68,44 @@ def lic_file(dest):
     return os.path.join(dest, ".fabrica-licenca")
 
 
+def resumo(d):
+    out = {"plan": d.get("plan")}
+    if d.get("plan") == "b2b":
+        out.update(client=d.get("client"), clients_used=d.get("clients_used"), clients_limit=d.get("clients_limit"))
+    return out
+
+
 def cmd_license(a):
-    d = license_(a.email)
-    print(json.dumps({"ok": True, "version": d.get("version")}))
+    d = license_(a.email, a.client)
+    print(json.dumps({"ok": True, "version": d.get("version"), **resumo(d)}))
 
 
 def cmd_install(a):
-    d = license_(a.email)
+    if a.client and a.dir == "fabrica":
+        a.dir = "fabrica-" + slug(a.client)  # uma pasta por cliente
+    d = license_(a.email, a.client)
+    if d.get("plan") == "b2b" and not a.client:
+        sys.exit("NEED_CLIENT: agency license, run install again with --client \"Client name\"")
     files = unpack(download(d["download"]), a.dir)
+    info = {"email": a.email.strip().lower(), "version": d.get("version")}
+    if a.client:
+        info["client"] = a.client
+        for cfg in ("fabrica.config.js", "fabrica.config.en.js"):  # separa ações de vários clientes no mesmo domínio
+            p = os.path.join(a.dir, cfg)
+            if os.path.exists(p):
+                s = open(p).read()
+                open(p, "w").write(re.sub(r"chave:\s*''", "chave: '" + slug(a.client) + "'", s, count=1))
     with open(lic_file(a.dir), "w") as f:
-        json.dump({"email": a.email.strip().lower(), "version": d.get("version")}, f)
+        json.dump(info, f)
     os.chmod(os.path.join(a.dir, "iniciar.sh"), 0o755) if os.path.exists(os.path.join(a.dir, "iniciar.sh")) else None
-    print(json.dumps({"ok": True, "dir": os.path.abspath(a.dir), "version": d.get("version"), "files": len(files)}))
+    print(json.dumps({"ok": True, "dir": os.path.abspath(a.dir), "version": d.get("version"), "files": len(files), **resumo(d)}))
 
 
 def cmd_update(a):
     if not os.path.exists(lic_file(a.dir)):
         sys.exit("NO_INSTALL: run install first")
     info = json.load(open(lic_file(a.dir)))
-    d = license_(info["email"])
+    d = license_(info["email"], info.get("client"))
     if d.get("version") and d.get("version") == info.get("version") and not a.force:
         print(json.dumps({"ok": True, "updated": False, "version": d.get("version")}))
         return
@@ -135,6 +162,7 @@ def main():
         s.add_argument("--dir", default="fabrica")
         if name in ("license", "install"):
             s.add_argument("--email", required=True)
+            s.add_argument("--client", help="agency plan: the client this factory is for")
         if name == "update":
             s.add_argument("--force", action="store_true")
         if name == "numbers":

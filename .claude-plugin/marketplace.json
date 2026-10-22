@@ -2,7 +2,7 @@
   "name": "fabrica",
   "owner": { "name": "Fábrica", "url": "https://fabrica-site-71s.pages.dev/en/" },
   "description": "Fábrica: your company as a pixel-art factory. Claude installs it, pulls your funnel numbers and keeps it updated.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "plugins": [
     {
       "name": "fabrica",
