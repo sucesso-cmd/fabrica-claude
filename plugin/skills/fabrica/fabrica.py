@@ -12,7 +12,7 @@ Install and update keep fabrica.config.js, dados.json and anything the customer 
 """
 import argparse, io, json, os, re, shutil, sys, urllib.error, urllib.request, zipfile
 
-SERVER = os.environ.get("FABRICA_SERVER", "https://fabrica-site-71s.pages.dev")
+SERVER = os.environ.get("FABRICA_SERVER", "https://getfabrica.app")
 KEEP = {"fabrica.config.js", "dados.json", ".fabrica-licenca"}
 
 

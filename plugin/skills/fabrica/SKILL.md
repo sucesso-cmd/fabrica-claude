@@ -12,7 +12,7 @@ The helper script `fabrica.py` lives in this skill's base directory. Run it with
 ## 1. Install
 
 1. Ask for the email used to subscribe. Run `fabrica.py install --email EMAIL --dir fabrica` in the user's current folder (ask first if they want another folder).
-2. If it prints `LICENSE_FAIL`, tell the user plainly that no active Fábrica subscription was found for that email and give them https://fabrica-site-71s.pages.dev/en/#preco. Stop there.
+2. If it prints `LICENSE_FAIL`, tell the user plainly that no active Fábrica subscription was found for that email and give them https://getfabrica.app/en/#preco. Stop there.
 3. If it prints `NEED_CLIENT`, the email has the agency plan: ask which client this factory is for and use the client install below.
 4. On success, go to step 2. Never edit `index.html`.
 
